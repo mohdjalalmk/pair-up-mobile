@@ -1,22 +1,34 @@
+// src/navigation/AppNavigator.tsx
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useAuthStore } from '../store/authStore';
+import { ActivityIndicator, View } from 'react-native';
+import LoginScreen from '../screens/LoginScreen';
+import SignupScreen from '../screens/SignupScreen';
 import BottomTabs from './BottomTabs';
-import SignInScreen from '../screens/SignInScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Simulated token (replace with real logic later)
-const token = 'sample_token'; // If null/undefined → Auth screen
-
 const AppNavigator = () => {
+  const { isLoggedIn, isBootstrapping } = useAuthStore();
+
+  if (isBootstrapping) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#FF5A5F" />
+      </View>
+    );
+  }
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {token ? (
-        // Main App Flow (Tabs + Stack)
+      {isLoggedIn ? (
         <Stack.Screen name="MainApp" component={BottomTabs} />
       ) : (
-        // Auth Flow
-        <Stack.Screen name="SignIn" component={SignInScreen} />
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} options={{ gestureEnabled: false }} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+        </>
       )}
     </Stack.Navigator>
   );
