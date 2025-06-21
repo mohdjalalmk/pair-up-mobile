@@ -1,35 +1,43 @@
 // src/api/axiosInstance.ts
 import axios from 'axios';
 import { getToken, removeToken } from '../utils/auth';
+import { useAuthStore } from '../store/authStore';
 
 const api = axios.create({
-  baseURL: 'https://your-api.com',
+  baseURL: 'http://localhost:3000/', // Change to your server IP if testing on device
   timeout: 10000,
-  withCredentials: true, // only needed if using cookie-based auth
+  headers: {
+    'Content-Type': 'application/json', // ✅ added here
+  },
 });
 
 // Add token to headers before request
 api.interceptors.request.use(
-  async (config) => {
+  async config => {
+    console.log('here');
+
     const token = await getToken();
+    console.log('Token in Axios:', token); // ✅ ADD THIS
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('token:', token);
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  error => Promise.reject(error),
 );
 
 // Handle response errors globally (optional: for refresh logic)
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     if (error.response?.status === 401) {
-      // Optionally: handle token refresh logic here
-      await removeToken(); // or redirect to login
+      await removeToken(); // clear Keychain / storage
+      useAuthStore.getState().logout(); // clear Zustand and re-render UI
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

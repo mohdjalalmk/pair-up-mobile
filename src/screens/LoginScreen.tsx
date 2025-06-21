@@ -11,6 +11,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
 import Keychain from 'react-native-keychain';
+import { login } from '../services/authServices';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -29,16 +30,17 @@ const LoginScreen = () => {
   }, []);
 
   const handleLogin = async () => {
-    const token = 'demo_token';
-    await Keychain.setGenericPassword('auth', token);
-    useAuthStore.getState().setToken(token);
+    // const token = 'demo_token';
+    // await Keychain.setGenericPassword('auth', token);
+    // useAuthStore.getState().setToken(token);
 
+    const resp = await login(email,password)
     // Add auth logic here
-    console.log('Logging in with:', email, password);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'MainApp' }],
-    });
+    console.log('Logging in with:', resp);
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{ name: 'MainApp' }],
+    // });
   };
 
   return (
