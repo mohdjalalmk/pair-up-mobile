@@ -16,7 +16,6 @@ const BottomTabs = () => {
         tabBarShowLabel: false,
         tabBarStyle: {
           ...styles.tabBarStyle,
-          display: route.name === 'Screen 4' ? 'none' : 'flex',
         },
       })}
     >

@@ -1,40 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import {
   View,
-  Text,
   Button,
-  FlatList,
   ActivityIndicator,
+  Text,
   StyleSheet,
+  Image,
+  Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
 import Keychain from 'react-native-keychain';
 import api from '../api/axiosInstance';
-import FeedCard from '../components/FeedCard';
+import { SwipeCard } from '../components/SwipeCard';
+import AppScreen from '../components/AppScreen';
+import { getUserFeed } from '../services/userService';
+
+const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
   const navigation = useNavigation<any>();
   const [feed, setFeed] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
 
-  const fetchFeed = async (pageNum = 1) => {
-    try {
-      const res = await api.get(`/user/feed?page=${pageNum}&limit=18`);
-      const newData = res.data.data;
-
-      if (newData.length === 0) {
-        setHasMore(false);
-      } else {
-        setFeed(prev => [...prev, ...newData]);
-      }
-    } catch (err) {
-      console.error('Failed to load feed', err);
-    } finally {
-      setLoading(false);
-    }
+  const fetchFeed = async () => {
+    setLoading(true);
+  const data = await getUserFeed();
+  setFeed(data);
+  setLoading(false);
   };
 
   useEffect(() => {
@@ -46,35 +39,39 @@ const HomeScreen = () => {
     useAuthStore.getState().logout();
   };
 
-  const handleLoadMore = () => {
-    if (hasMore && !loading) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchFeed(nextPage);
-    }
-  };
+  const renderCard = (item: any) => (
+    <View style={[styles.card, styles.shadow]}>
+      <View style={styles.imageContainer}>
+        <Image
+          source={require(`../../assets/images/img1.jpeg`)} // Dummy profile picture
+          style={styles.profileImage}
+          resizeMode="cover"
+        />
+        <View style={styles.nameOverlay}>
+          <Text style={styles.nameText}>{item.firstName}</Text>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
-      <Button title="Log out" onPress={handleLogout} />
+    <AppScreen>
+      <View style={styles.container}>
+        <Button title="Log out" onPress={handleLogout} />
 
-      {loading && page === 1 ? (
-        <ActivityIndicator style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={feed}
-          keyExtractor={(item, index) => index.toString()}
-          numColumns={2}
-          contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => <FeedCard name={item.firstName} />}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            loading ? <ActivityIndicator style={{ margin: 10 }} /> : null
-          }
-        />
-      )}
-    </View>
+        {loading ? (
+          <ActivityIndicator style={{ marginTop: 20 }} />
+        ) : (
+          <SwipeCard
+            data={feed}
+            renderCard={renderCard}
+            onSwipeLeft={item => console.log('Swiped Left:', item)}
+            onSwipeRight={item => console.log('Swiped Right:', item)}
+            onSwipeTop={item => console.log('Swiped Top:', item)}
+          />
+        )}
+      </View>
+    </AppScreen>
   );
 };
 
@@ -83,9 +80,50 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 60,
+    // paddingHorizontal: 20,
   },
-  listContent: {
-    paddingVertical: 10,
+  card: {
+    width: width * 0.9,
+    height: 500,
+    borderRadius: 15,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+    borderWidth: 0.2,
+  },
+  imageContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+  },
+  nameOverlay: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingVertical: 6,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  nameText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  shadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8, // For Android
   },
 });
