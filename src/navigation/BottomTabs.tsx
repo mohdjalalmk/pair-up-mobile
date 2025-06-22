@@ -25,10 +25,7 @@ const BottomTabs = () => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon
-              focused={focused}
-              icon={require('../../assets/images/home.png')}
-            />
+            <TabIcon focused={focused} icon={'home'} />
           ),
         }}
       />
@@ -37,10 +34,7 @@ const BottomTabs = () => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon
-              focused={focused}
-              icon={require('../../assets/images/chat.png')}
-            />
+            <TabIcon focused={focused} icon={'chat'} />
           ),
         }}
       />
@@ -62,10 +56,7 @@ const BottomTabs = () => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon
-              focused={focused}
-              icon={require('../../assets/images/star.webp')}
-            />
+            <TabIcon focused={focused} icon={'colours'} />
           ),
         }}
       />
@@ -74,10 +65,7 @@ const BottomTabs = () => {
         component={ProfileScreen}
         options={{
           tabBarIcon: ({ focused }) => (
-            <TabIcon
-              focused={focused}
-              icon={require('../../assets/images/home.png')}
-            />
+            <TabIcon focused={focused} icon={'user'} />
           ),
         }}
       />

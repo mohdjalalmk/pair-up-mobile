@@ -1,15 +1,16 @@
 import React from 'react';
 import { View, Image, ImageSourcePropType, StyleSheet } from 'react-native';
+import Icon from 'react-native-vector-icons/Entypo';
 
 interface Props {
   focused: boolean;
-  icon: ImageSourcePropType;
+  icon: string;
 }
 
 const TabIcon: React.FC<Props> = ({ focused, icon }) => {
   return (
     <View style={[styles.iconContainer, focused && styles.focused]}>
-      <Image source={icon} style={styles.iconImage} />
+      <Icon size={24} name={icon} />
     </View>
   );
 };
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   focused: {
-    backgroundColor: '#7EC8E3',
+    backgroundColor: '#798c86',
   },
   iconImage: {
     width: 25,
@@ -32,6 +33,5 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
 });
-
 
 export default TabIcon;

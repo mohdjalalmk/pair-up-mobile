@@ -9,7 +9,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/Entypo';
 import AppScreen from '../components/AppScreen';
 import { useAuthStore } from '../store/authStore';
 import Keychain from 'react-native-keychain';
@@ -30,7 +30,7 @@ const ProfileScreen = () => {
   const [editing, setEditing] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
 
-   const handleLogout = async () => {
+  const handleLogout = async () => {
     await Keychain.resetGenericPassword();
     useAuthStore.getState().logout();
   };
@@ -48,140 +48,104 @@ const ProfileScreen = () => {
     // send updated data to backend here
   };
 
-  return (
-    <AppScreen>
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Profile</Text>
-          <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-            <Icon name="dots-vertical" size={24} />
-          </TouchableOpacity>
-        </View>
-
-        {/* 3-dot Menu */}
-        {menuVisible && (
-          <View style={styles.menu}>
-            <TouchableOpacity
-              onPress={() => {
-                setEditing(true);
-                setMenuVisible(false);
-              }}
-            >
-              <Text>Edit Profile</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setMenuVisible(false);
-                handleLogout();
-              }}
-            >
-              <Text>Sign Out</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setMenuVisible(false);
-                handleDelete();
-              }}
-            >
-              <Text style={{ color: 'red' }}>Delete Account</Text>
-            </TouchableOpacity>
+  const renderTextOrInput = (
+    label: string,
+    value: string,
+    onChange: (val: string) => void,
+    isNumeric = false,
+  ) => {
+    return (
+      <View style={styles.row}>
+        <Text style={styles.label}>{label}:</Text>
+        {editing ? (
+          <TextInput
+            style={styles.input}
+            value={value}
+            keyboardType={isNumeric ? 'numeric' : 'default'}
+            onChangeText={onChange}
+          />
+        ) : (
+          <View style={styles.displayBox}>
+            <Text style={styles.displayText}>{value}</Text>
           </View>
         )}
-
-        <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.row}>
-            <Text style={styles.label}>First Name:</Text>
-            {editing ? (
-              <TextInput
-                style={styles.input}
-                value={user.firstName}
-                onChangeText={text => setUser({ ...user, firstName: text })}
-              />
-            ) : (
-              <Text>{user.firstName}</Text>
-            )}
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Last Name:</Text>
-            {editing ? (
-              <TextInput
-                style={styles.input}
-                value={user.lastName}
-                onChangeText={text => setUser({ ...user, lastName: text })}
-              />
-            ) : (
-              <Text>{user.lastName}</Text>
-            )}
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Email:</Text>
-            <Text>{user.email}</Text>
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Age:</Text>
-            {editing ? (
-              <TextInput
-                style={styles.input}
-                keyboardType="numeric"
-                value={String(user.age)}
-                onChangeText={text => setUser({ ...user, age: parseInt(text) })}
-              />
-            ) : (
-              <Text>{user.age}</Text>
-            )}
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Gender:</Text>
-            {editing ? (
-              <TextInput
-                style={styles.input}
-                value={user.gender}
-                onChangeText={text => setUser({ ...user, gender: text })}
-              />
-            ) : (
-              <Text>{user.gender}</Text>
-            )}
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Description:</Text>
-            {editing ? (
-              <TextInput
-                style={styles.input}
-                value={user.description}
-                onChangeText={text => setUser({ ...user, description: text })}
-              />
-            ) : (
-              <Text>{user.description}</Text>
-            )}
-          </View>
-
-          <View style={styles.row}>
-            <Text style={styles.label}>Skills:</Text>
-            {editing ? (
-              <TextInput
-                style={styles.input}
-                value={user.skills.join(', ')}
-                onChangeText={text =>
-                  setUser({
-                    ...user,
-                    skills: text.split(',').map(s => s.trim()),
-                  })
-                }
-              />
-            ) : (
-              <Text>{user.skills.join(', ')}</Text>
-            )}
-          </View>
-
-          {editing && <Button title="Save Changes" onPress={handleSave} />}
-        </ScrollView>
       </View>
+    );
+  };
+
+  return (
+    <AppScreen>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.profile}>
+          <Text style={styles.title}>Profile</Text>
+        </View>
+        <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+          <Icon name="dots-three-vertical" size={24} />
+        </TouchableOpacity>
+      </View>
+
+      {/* 3-dot Menu */}
+      {menuVisible && (
+        <View style={styles.menu}>
+          <TouchableOpacity
+            onPress={() => {
+              setEditing(true);
+              setMenuVisible(false);
+            }}
+          >
+            <Text>Edit Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setMenuVisible(false);
+              handleLogout();
+            }}
+          >
+            <Text>Sign Out</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setMenuVisible(false);
+              handleDelete();
+            }}
+          >
+            <Text style={{ color: 'red' }}>Delete Account</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <ScrollView contentContainerStyle={styles.content}>
+        {renderTextOrInput('First Name', user.firstName, text =>
+          setUser({ ...user, firstName: text }),
+        )}
+        {renderTextOrInput('Last Name', user.lastName, text =>
+          setUser({ ...user, lastName: text }),
+        )}
+        <View style={styles.row}>
+          <Text style={styles.label}>Email:</Text>
+          <View style={styles.displayBox}>
+            <Text style={styles.displayText}>{user.email}</Text>
+          </View>
+        </View>
+        {renderTextOrInput(
+          'Age',
+          String(user.age),
+          text => setUser({ ...user, age: parseInt(text) }),
+          true,
+        )}
+        {renderTextOrInput('Gender', user.gender, text =>
+          setUser({ ...user, gender: text }),
+        )}
+        {renderTextOrInput('Description', user.description, text =>
+          setUser({ ...user, description: text }),
+        )}
+        {renderTextOrInput('Skills', user.skills.join(', '), text =>
+          setUser({ ...user, skills: text.split(',').map(s => s.trim()) }),
+        )}
+
+        {editing && <Button title="Save Changes" onPress={handleSave} />}
+      </ScrollView>
     </AppScreen>
   );
 };
@@ -189,17 +153,21 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: '#fff' },
+  //   container: { flex: 1, backgroundColor: '#fff' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: '#f6f6f6',
     alignItems: 'center',
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  profile:{
+    backgroundColor:"#798c86",
+    padding:5,
+    borderRadius:10
   },
   menu: {
     backgroundColor: 'white',
@@ -227,5 +195,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 6,
     padding: 8,
+  },
+  displayBox: {
+    backgroundColor: '#c5d6d1',
+    padding: 10,
+    borderRadius: 8,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    minHeight: 42,
+    justifyContent: 'center',
+  },
+  displayText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
