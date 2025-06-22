@@ -37,6 +37,7 @@ export const SwipeCard = <T extends object>({
   const [position] = useState(new Animated.ValueXY());
   const [index, setIndex] = useState(0);
   const nextCardIndex = useRef(1);
+  const currentIndexRef = useRef(0); // ✅ Keeps real-time index
 
   const panResponder = useRef(
     PanResponder.create({
@@ -110,7 +111,10 @@ export const SwipeCard = <T extends object>({
   });
 
   const onSwipeComplete = (direction: 'right' | 'left' | 'top') => {
-    const item = data[index];
+    const currentIndex = currentIndexRef.current;
+
+    const item = data[currentIndexRef.current];
+
     switch (direction) {
       case 'right':
         onSwipeRight(item);
@@ -122,17 +126,19 @@ export const SwipeCard = <T extends object>({
         onSwipeTop(item);
         break;
     }
-    console.log('index,', index);
 
-    console.log('dataa',data.length )
-
-    // calls the function when there is 2 items remaining 
-    if (nextCardIndex.current === data.length - 2 && onEndReached) {
+    // ✅ Trigger onEndReached if 2 items remaining
+    if (currentIndex === data.length - 2 && onEndReached) {
       onEndReached();
     }
 
     position.setValue({ x: 0, y: 0 });
-    setIndex(nextCardIndex.current++);
+
+    // ✅ Move to next card
+    const nextIndex = currentIndex + 1;
+    setIndex(nextIndex);
+    currentIndexRef.current = nextIndex;
+    nextCardIndex.current = nextIndex + 1;
   };
 
   const resetPosition = () => {
@@ -155,7 +161,7 @@ export const SwipeCard = <T extends object>({
   };
 
   const renderCards = () => {
-    if (!data?.length || index >= data?.length) {
+    if (!data?.length || currentIndexRef.current >= data?.length) {
       return renderEmptyCardView ? (
         renderEmptyCardView()
       ) : (
@@ -192,7 +198,7 @@ export const SwipeCard = <T extends object>({
             <Text style={styles.nopeText}>NOPE ❌</Text>
           </Animated.View>
 
-          {renderCard(data[index])}
+          {renderCard(data[currentIndexRef.current])}
         </>
       </Animated.View>
     );

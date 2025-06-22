@@ -5,6 +5,7 @@ import { Image, StyleSheet } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import CustomTabBarButton from '../components/CustomTabBarButton';
 import TabIcon from '../components/TabIcon';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -70,7 +71,7 @@ const BottomTabs = () => {
       />
       <Tab.Screen
         name="Screen 5"
-        component={HomeScreen}
+        component={ProfileScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon

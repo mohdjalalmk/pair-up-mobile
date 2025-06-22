@@ -13,11 +13,12 @@ import { useAuthStore } from '../store/authStore';
 import Keychain from 'react-native-keychain';
 import { SwipeCard } from '../components/SwipeCard';
 import AppScreen from '../components/AppScreen';
-import { getUserFeed } from '../services/userService';
+import { getUserFeed, sendSwipeResponse } from '../services/userService';
 import Toast from 'react-native-toast-message';
 
 const { width } = Dimensions.get('window');
 
+//TODO: Hvae some issues with data handling in onswipe right,left , FIX
 const HomeScreen = () => {
   const navigation = useNavigation<any>();
   const [feed, setFeed] = useState<any[]>([]);
@@ -36,7 +37,7 @@ const HomeScreen = () => {
         setHasMore(false);
         return;
       }
-      console.log('fetched response:', data.length);
+      console.log('fetched response:', data);
 
       setFeed(prev => (currentPage === 1 ? data : [...prev, ...data]));
     } catch (err: any) {
@@ -67,9 +68,36 @@ const HomeScreen = () => {
     fetchFeed(nextPage);
   }, [page, hasMore, isFetchingMore]);
 
-  const handleLogout = async () => {
-    await Keychain.resetGenericPassword();
-    useAuthStore.getState().logout();
+ 
+
+  const handleSwipeLeft = async (item: any) => {
+    try {
+      await sendSwipeResponse('ignored', item._id);
+      console.log('Swiped Left:', item);
+    } catch (err) {
+      console.error('Error on left swipe:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Swipe Failed',
+        text2: 'Unable to send ignored status',
+        position: 'bottom',
+      });
+    }
+  };
+
+  const handleSwipeRight = async (item: any) => {
+    try {
+      await sendSwipeResponse('interested', item._id);
+      console.log('Swiped Right:', item);
+    } catch (err) {
+      console.error('Error on right swipe:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Swipe Failed',
+        text2: 'Unable to send interested status',
+        position: 'bottom',
+      });
+    }
   };
 
   const renderCard = (item: any) => (
@@ -90,7 +118,6 @@ const HomeScreen = () => {
   return (
     <AppScreen>
       <View style={styles.container}>
-        <Button title="Log out" onPress={handleLogout} />
 
         {loading ? (
           <ActivityIndicator style={{ marginTop: 20 }} />
@@ -98,8 +125,8 @@ const HomeScreen = () => {
           <SwipeCard
             data={feed}
             renderCard={renderCard}
-            onSwipeLeft={item => console.log('Swiped Left:', item)}
-            onSwipeRight={item => console.log('Swiped Right:', item)}
+            onSwipeLeft={handleSwipeLeft}
+            onSwipeRight={handleSwipeRight}
             onSwipeTop={item => console.log('Swiped Top:', item)}
             onEndReached={fetchNextPage}
           />
