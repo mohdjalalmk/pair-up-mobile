@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Button,
@@ -11,28 +11,61 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
 import Keychain from 'react-native-keychain';
-import api from '../api/axiosInstance';
 import { SwipeCard } from '../components/SwipeCard';
 import AppScreen from '../components/AppScreen';
 import { getUserFeed } from '../services/userService';
+import Toast from 'react-native-toast-message';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = () => {
   const navigation = useNavigation<any>();
-  const [feed, setFeed] = useState([]);
+  const [feed, setFeed] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-  const fetchFeed = async () => {
-    setLoading(true);
-  const data = await getUserFeed();
-  setFeed(data);
-  setLoading(false);
+  const fetchFeed = async (currentPage = 1) => {
+    console.log('fetching ,', currentPage);
+
+    try {
+      if (currentPage === 1) setLoading(true);
+      const data = await getUserFeed(currentPage);
+      if (!data?.length) {
+        setHasMore(false);
+        return;
+      }
+      console.log('fetched response:', data.length);
+
+      setFeed(prev => (currentPage === 1 ? data : [...prev, ...data]));
+    } catch (err: any) {
+      console.error('Error fetching feed:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to load feed',
+        text2: err?.message || 'Please try again later',
+        position: 'bottom',
+      });
+    } finally {
+      setLoading(false);
+      setIsFetchingMore(false);
+    }
   };
 
   useEffect(() => {
-    fetchFeed();
+    fetchFeed(1);
   }, []);
+
+  const fetchNextPage = useCallback(() => {
+    console.log('has', hasMore);
+
+    if (!hasMore || isFetchingMore) return;
+    setIsFetchingMore(true);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchFeed(nextPage);
+  }, [page, hasMore, isFetchingMore]);
 
   const handleLogout = async () => {
     await Keychain.resetGenericPassword();
@@ -43,7 +76,7 @@ const HomeScreen = () => {
     <View style={[styles.card, styles.shadow]}>
       <View style={styles.imageContainer}>
         <Image
-          source={require(`../../assets/images/img1.jpeg`)} // Dummy profile picture
+          source={require(`../../assets/images/img1.jpeg`)}
           style={styles.profileImage}
           resizeMode="cover"
         />
@@ -68,6 +101,7 @@ const HomeScreen = () => {
             onSwipeLeft={item => console.log('Swiped Left:', item)}
             onSwipeRight={item => console.log('Swiped Right:', item)}
             onSwipeTop={item => console.log('Swiped Top:', item)}
+            onEndReached={fetchNextPage}
           />
         )}
       </View>

@@ -22,6 +22,7 @@ interface SwipeCardProps<T> {
   onSwipeTop: (item: T) => void;
   renderCard: (item: T) => React.ReactNode;
   renderEmptyCardView?: () => React.ReactNode;
+  onEndReached?: () => void; // ✅ new
 }
 
 export const SwipeCard = <T extends object>({
@@ -31,6 +32,7 @@ export const SwipeCard = <T extends object>({
   onSwipeTop,
   renderCard,
   renderEmptyCardView,
+  onEndReached,
 }: SwipeCardProps<T>) => {
   const [position] = useState(new Animated.ValueXY());
   const [index, setIndex] = useState(0);
@@ -120,6 +122,15 @@ export const SwipeCard = <T extends object>({
         onSwipeTop(item);
         break;
     }
+    console.log('index,', index);
+
+    console.log('dataa',data.length )
+
+    // calls the function when there is 2 items remaining 
+    if (nextCardIndex.current === data.length - 2 && onEndReached) {
+      onEndReached();
+    }
+
     position.setValue({ x: 0, y: 0 });
     setIndex(nextCardIndex.current++);
   };

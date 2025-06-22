@@ -4,6 +4,8 @@ import AppNavigator from './src/navigation/RootNavigator';
 import { useAuthStore } from './src/store/authStore';
 import { NavigationContainer } from '@react-navigation/native';
 import { getToken } from './src/utils/auth';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/utils/toastConfig';
 
 const App = () => {
   const setToken = useAuthStore(s => s.setToken);
@@ -24,6 +26,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <AppNavigator />
+      <Toast config={toastConfig} />
     </NavigationContainer>
   );
 };
