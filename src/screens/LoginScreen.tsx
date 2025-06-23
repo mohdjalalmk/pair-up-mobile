@@ -1,4 +1,3 @@
-// src/screens/LoginScreen.tsx
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -9,8 +8,6 @@ import {
   BackHandler,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '../store/authStore';
-import Keychain from 'react-native-keychain';
 import { login } from '../services/authServices';
 
 const LoginScreen = () => {
@@ -20,65 +17,71 @@ const LoginScreen = () => {
   const navigation = useNavigation<any>();
 
   useEffect(() => {
-    const backAction = () => true; // prevent going back
+    const backAction = () => true;
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       backAction,
     );
 
-    return () => backHandler.remove(); // cleanup
+    return () => backHandler.remove();
   }, []);
 
   const handleLogin = async () => {
-    // const token = 'demo_token';
-    // await Keychain.setGenericPassword('auth', token);
-    // useAuthStore.getState().setToken(token);
+    await login(email, password);
+  };
 
-    const resp = await login(email,password)
-    // Add auth logic here
-    console.log('Logging in with:', resp);
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: 'MainApp' }],
-    // });
+  const InputContainer = () => {
+    return (
+      <>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          onChangeText={setEmail}
+          value={email}
+        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            secureTextEntry={!showPassword}
+            onChangeText={setPassword}
+            value={password}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Text style={styles.toggle}>{showPassword ? 'Hide' : 'Show'}</Text>
+          </TouchableOpacity>
+        </View>
+      </>
+    );
+  };
+
+  const AuthButtons = () => {
+    return (
+      <>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Log In</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.bottomText}>
+          Don't have an account?{' '}
+          <Text
+            style={styles.link}
+            onPress={() => navigation.navigate('Signup')}
+          >
+            Sign Up
+          </Text>
+        </Text>
+      </>
+    );
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back 👋</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        onChangeText={setEmail}
-        value={email}
-      />
-
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Password"
-          secureTextEntry={!showPassword}
-          onChangeText={setPassword}
-          value={password}
-        />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Text style={styles.toggle}>{showPassword ? 'Hide' : 'Show'}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.bottomText}>
-        Don't have an account?{' '}
-        <Text style={styles.link} onPress={() => navigation.navigate('Signup')}>
-          Sign Up
-        </Text>
-      </Text>
+      {InputContainer()}
+      {AuthButtons()}
     </View>
   );
 };

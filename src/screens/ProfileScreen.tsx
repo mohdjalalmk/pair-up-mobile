@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,30 +8,57 @@ import {
   Alert,
   ScrollView,
   TouchableOpacity,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import AppScreen from '../components/AppScreen';
 import { useAuthStore } from '../store/authStore';
 import Keychain from 'react-native-keychain';
-
-const mockUser = {
-  firstName: 'Jalal',
-  lastName: 'Mohammed',
-  age: 25,
-  email: 'jalal@example.com',
-  gender: 'male',
-  photoUrl: 'https://via.placeholder.com/150',
-  description: 'Whatsapp devs!',
-  skills: ['React Native', 'Node.js', 'MongoDB'],
-};
+import { removeToken } from '../utils/auth';
+import api from '../api/axiosInstance';
+import { logout } from '../services/authServices';
+import { User, useUserStore } from '../store/userStore';
+import { viewProfile } from '../services/userService';
+import Toast from 'react-native-toast-message';
 
 const ProfileScreen = () => {
-  const [user, setUser] = useState(mockUser);
+  const storeUser = useUserStore(state => state.user);
+  console.log(storeUser, ':::store user');
+
+  const [user, setUser] = useState<User>(storeUser);
   const [editing, setEditing] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      fetchProfile();
+    }
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const profileData = await viewProfile();
+      setUser(profileData);
+    } catch (error) {
+      if (error instanceof Error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to fetch details',
+          text2: error.message,
+          position: 'bottom',
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
-    await Keychain.resetGenericPassword();
+    await logout();
+    await removeToken();
     useAuthStore.getState().logout();
   };
 
@@ -73,48 +100,8 @@ const ProfileScreen = () => {
     );
   };
 
-  return (
-    <AppScreen>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.profile}>
-          <Text style={styles.title}>Profile</Text>
-        </View>
-        <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-          <Icon name="dots-three-vertical" size={24} />
-        </TouchableOpacity>
-      </View>
-
-      {/* 3-dot Menu */}
-      {menuVisible && (
-        <View style={styles.menu}>
-          <TouchableOpacity
-            onPress={() => {
-              setEditing(true);
-              setMenuVisible(false);
-            }}
-          >
-            <Text>Edit Profile</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setMenuVisible(false);
-              handleLogout();
-            }}
-          >
-            <Text>Sign Out</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setMenuVisible(false);
-              handleDelete();
-            }}
-          >
-            <Text style={{ color: 'red' }}>Delete Account</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
+  const FormContent = () => {
+    return (
       <ScrollView contentContainerStyle={styles.content}>
         {renderTextOrInput('First Name', user.firstName, text =>
           setUser({ ...user, firstName: text }),
@@ -146,6 +133,104 @@ const ProfileScreen = () => {
 
         {editing && <Button title="Save Changes" onPress={handleSave} />}
       </ScrollView>
+    );
+  };
+
+  const ProfileMenu = () => {
+    return (
+      <View style={styles.menu}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => {
+            setEditing(true);
+            setMenuVisible(false);
+          }}
+        >
+          <Icon name="edit" size={18} style={styles.menuIcon} />
+          <Text style={styles.menuText}>Edit Profile</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => {
+            setMenuVisible(false);
+            handleLogout();
+          }}
+        >
+          <Icon name="log-out" size={18} style={styles.menuIcon} />
+          <Text style={styles.menuText}>Sign Out</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => {
+            setMenuVisible(false);
+            handleDelete();
+          }}
+        >
+          <Icon
+            name="trash"
+            size={18}
+            style={[styles.menuIcon, { color: 'red' }]}
+          />
+          <Text style={[styles.menuText, { color: 'red' }]}>
+            Delete Account
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const ProfilePhoto = () => {
+    return (
+      <>
+        {user.photoUrl ? (
+          <View style={styles.photo}>
+            <Image
+              source={{
+                uri: user.photoUrl,
+              }}
+              style={styles.profileIcon}
+            />
+          </View>
+        ) : (
+          <View style={styles.center}>
+            <Icon size={100} name={'user'} />
+          </View>
+        )}
+      </>
+    );
+  };
+
+  const ProfileHeader = () => {
+    return (
+      <View style={styles.header}>
+        <View style={styles.profile}>
+          <Text style={styles.title}>Profile</Text>
+        </View>
+        <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+          <Icon name="dots-three-vertical" size={24} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <AppScreen>
+      {/* Header */}
+      {ProfileHeader()}
+      {ProfilePhoto()}
+      {/* 3-dot Menu */}
+      {menuVisible && ProfileMenu()}
+      {FormContent()}
     </AppScreen>
   );
 };
@@ -153,7 +238,7 @@ const ProfileScreen = () => {
 export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  //   container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -164,20 +249,39 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
-  profile:{
-    backgroundColor:"#798c86",
-    padding:5,
-    borderRadius:10
+  profile: {
+    backgroundColor: '#798c86',
+    padding: 5,
+    borderRadius: 10,
   },
   menu: {
-    backgroundColor: 'white',
-    padding: 10,
-    elevation: 2,
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
     position: 'absolute',
-    right: 10,
-    top: 50,
-    borderRadius: 6,
-    zIndex: 10,
+    right: 16,
+    top: 60,
+    elevation: 5, // Android shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    zIndex: 100,
+    minWidth: 180,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  menuIcon: {
+    marginRight: 10,
+    color: '#444',
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#333',
   },
   content: {
     padding: 16,
@@ -209,4 +313,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
+  photo: { alignItems: 'center', marginTop: 10 },
+  profileIcon: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: '#798c86',
+  },
+  center: { justifyContent: 'center', alignItems: 'center' },
 });
