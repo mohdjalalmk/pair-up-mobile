@@ -118,7 +118,6 @@ const HomeScreen = () => {
   return (
     <AppScreen>
       <View style={styles.container}>
-
         {loading ? (
           <ActivityIndicator style={{ marginTop: 20 }} />
         ) : (

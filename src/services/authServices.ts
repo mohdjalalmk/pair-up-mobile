@@ -3,31 +3,48 @@ import * as Keychain from 'react-native-keychain';
 import api from '../api/axiosInstance';
 import { useAuthStore } from '../store/authStore';
 import { storeToken } from '../utils/auth';
+import Toast from 'react-native-toast-message';
+import { useUserStore } from '../store/userStore';
 
 export const login = async (email: string, password: string) => {
   try {
-    console.log('jjjjjj');
-
     const response = await api.post('/login', {
       email: email.toLowerCase().trim(),
       password,
     });
-    console.log('response from login:', response);
 
     const token = response.data.token;
+    const user = response.data.user;
 
-    // Save to secure storage
     await storeToken(token);
 
     // Save to Zustand
     useAuthStore.getState().setToken(token);
+    useUserStore.getState().setUser(user);
 
-    return { success: true };
+    return { user: response.data.token };
   } catch (error: any) {
-    console.error('Login error:', error);
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Login failed',
-    };
+    console.log('error', JSON.stringify(error));
+
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to login',
+      text2: 'Invalid credentials',
+      position: 'bottom',
+    });
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await api.post('/logout');
+    console.log('Responces', response);
+  } catch (error) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to logout',
+      text2: err?.message || 'Please try again later',
+      position: 'bottom',
+    });
   }
 };

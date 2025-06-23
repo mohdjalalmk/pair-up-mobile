@@ -20,49 +20,63 @@ const SignupScreen = () => {
     console.log('Signing up:', name, email, password);
   };
 
+  const InputContainer = () => {
+    return (
+      <>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          onChangeText={setName}
+          value={name}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          autoCapitalize="none"
+          keyboardType="email-address"
+          onChangeText={setEmail}
+          value={email}
+        />
+
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            secureTextEntry={!showPassword}
+            onChangeText={setPassword}
+            value={password}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Text style={styles.toggle}>{showPassword ? 'Hide' : 'Show'}</Text>
+          </TouchableOpacity>
+        </View>
+      </>
+    );
+  };
+
+  const AuthButtons = () => {
+    return (
+      <>
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
+          <Text style={styles.buttonText}>Sign Up</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.bottomText}>
+          Already have an account?{' '}
+          <Text style={styles.link} onPress={() => navigation.goBack()}>
+            Log In
+          </Text>
+        </Text>
+      </>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account 💖</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        onChangeText={setName}
-        value={name}
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        autoCapitalize="none"
-        keyboardType="email-address"
-        onChangeText={setEmail}
-        value={email}
-      />
-
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Password"
-          secureTextEntry={!showPassword}
-          onChangeText={setPassword}
-          value={password}
-        />
-        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Text style={styles.toggle}>{showPassword ? 'Hide' : 'Show'}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.bottomText}>
-        Already have an account?{' '}
-        <Text style={styles.link} onPress={() => navigation.goBack()}>
-          Log In
-        </Text>
-      </Text>
+      {InputContainer()}
+      {AuthButtons()}
     </View>
   );
 };
