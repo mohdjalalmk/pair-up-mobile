@@ -19,8 +19,9 @@ import { removeToken } from '../utils/auth';
 import api from '../api/axiosInstance';
 import { logout } from '../services/authServices';
 import { User, useUserStore } from '../store/userStore';
-import { viewProfile } from '../services/userService';
+import { updateProfile, viewProfile } from '../services/userService';
 import Toast from 'react-native-toast-message';
+import { ALLOWED_EDIT_FIELDS } from '../constants/constants';
 
 const ProfileScreen = () => {
   const storeUser = useUserStore(state => state.user);
@@ -29,7 +30,7 @@ const ProfileScreen = () => {
   const [user, setUser] = useState<User>(storeUser);
   const [editing, setEditing] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -39,6 +40,8 @@ const ProfileScreen = () => {
 
   const fetchProfile = async () => {
     try {
+      console.log('Calling');
+
       setLoading(true);
       const profileData = await viewProfile();
       setUser(profileData);
@@ -69,10 +72,37 @@ const ProfileScreen = () => {
     ]);
   };
 
-  const handleSave = () => {
-    setEditing(false);
-    Alert.alert('Profile updated');
-    // send updated data to backend here
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      const filteredUser: Partial<User> = ALLOWED_EDIT_FIELDS.reduce(
+        (acc, key) => {
+          if (user[key] !== undefined) {
+            (acc as any)[key] = user[key];
+          }
+          return acc;
+        },
+        {} as Partial<User>,
+      );
+
+      await updateProfile(filteredUser);
+      Toast.show({
+        type: 'success',
+        text1: 'Profile updated',
+      });
+      setEditing(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Update failed',
+          text2: error.message,
+          position: 'bottom',
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderTextOrInput = (
@@ -103,31 +133,31 @@ const ProfileScreen = () => {
   const FormContent = () => {
     return (
       <ScrollView contentContainerStyle={styles.content}>
-        {renderTextOrInput('First Name', user.firstName, text =>
+        {renderTextOrInput('First Name', user?.firstName, text =>
           setUser({ ...user, firstName: text }),
         )}
-        {renderTextOrInput('Last Name', user.lastName, text =>
+        {renderTextOrInput('Last Name', user?.lastName, text =>
           setUser({ ...user, lastName: text }),
         )}
         <View style={styles.row}>
           <Text style={styles.label}>Email:</Text>
           <View style={styles.displayBox}>
-            <Text style={styles.displayText}>{user.email}</Text>
+            <Text style={styles.displayText}>{user?.email}</Text>
           </View>
         </View>
         {renderTextOrInput(
           'Age',
-          String(user.age),
+          String(user?.age),
           text => setUser({ ...user, age: parseInt(text) }),
           true,
         )}
-        {renderTextOrInput('Gender', user.gender, text =>
+        {renderTextOrInput('Gender', user?.gender, text =>
           setUser({ ...user, gender: text }),
         )}
-        {renderTextOrInput('Description', user.description, text =>
+        {renderTextOrInput('Description', user?.description, text =>
           setUser({ ...user, description: text }),
         )}
-        {renderTextOrInput('Skills', user.skills.join(', '), text =>
+        {renderTextOrInput('Skills', user?.skills.join(', '), text =>
           setUser({ ...user, skills: text.split(',').map(s => s.trim()) }),
         )}
 
@@ -184,7 +214,7 @@ const ProfileScreen = () => {
   const ProfilePhoto = () => {
     return (
       <>
-        {user.photoUrl ? (
+        {user?.photoUrl ? (
           <View style={styles.photo}>
             <Image
               source={{

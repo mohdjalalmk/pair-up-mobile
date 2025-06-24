@@ -68,8 +68,6 @@ const HomeScreen = () => {
     fetchFeed(nextPage);
   }, [page, hasMore, isFetchingMore]);
 
- 
-
   const handleSwipeLeft = async (item: any) => {
     try {
       await sendSwipeResponse('ignored', item._id);
@@ -104,12 +102,16 @@ const HomeScreen = () => {
     <View style={[styles.card, styles.shadow]}>
       <View style={styles.imageContainer}>
         <Image
-          source={require(`../../assets/images/img1.jpeg`)}
+          source={require(`../../assets/images/img1.jpeg`)} // replace with item.photoUrl if available
           style={styles.profileImage}
           resizeMode="cover"
         />
-        <View style={styles.nameOverlay}>
+        <View style={styles.detailsOverlay}>
           <Text style={styles.nameText}>{item.firstName}</Text>
+          <Text style={styles.subText}>
+            {item.age} | {' '}
+            {item.gender?.charAt(0).toUpperCase() + item.gender?.slice(1)}
+          </Text>
         </View>
       </View>
     </View>
@@ -185,5 +187,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 8, // For Android
+  },
+  detailsOverlay: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  subText: {
+    color: '#ccc',
+    fontSize: 14,
+    marginTop: 4,
   },
 });

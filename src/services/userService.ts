@@ -1,6 +1,7 @@
 // services/userService.ts
 import api from '../api/axiosInstance';
 import axios, { AxiosError } from 'axios';
+import { User } from '../store/userStore';
 
 export const getUserFeed = async (page = 1): Promise<any[]> => {
   try {
@@ -34,5 +35,15 @@ export const viewProfile = async (): Promise<any> => {
   } catch (err) {
     const error = err as AxiosError<{ message: string }>;
     throw new Error(error.response?.data?.message || 'Failed to fetch profile');
+  }
+};
+
+
+export const updateProfile = async (updatedData: Partial<User>) => {
+  try {
+    const response = await api.patch('/profile/edit', updatedData);
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || 'Failed to update profile');
   }
 };
