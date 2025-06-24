@@ -6,6 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import CustomTabBarButton from '../components/CustomTabBarButton';
 import TabIcon from '../components/TabIcon';
 import ProfileScreen from '../screens/ProfileScreen';
+import ReceivedRequestsScreen from '../screens/ReceivedRequests';
 
 const Tab = createBottomTabNavigator();
 
@@ -52,8 +53,8 @@ const BottomTabs = () => {
         }}
       /> */}
       <Tab.Screen
-        name="Screen 4"
-        component={HomeScreen}
+        name="Screen 3"
+        component={ReceivedRequestsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon focused={focused} icon={'colours'} />
@@ -61,7 +62,7 @@ const BottomTabs = () => {
         }}
       />
       <Tab.Screen
-        name="Screen 5"
+        name="Screen 4"
         component={ProfileScreen}
         options={{
           tabBarIcon: ({ focused }) => (
