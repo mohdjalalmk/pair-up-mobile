@@ -6,18 +6,14 @@ export const getReceivedRequests = async (): Promise<any[]> => {
     const res = await api.get('/user/requests/received');
     return res.data.data;
   } catch (error: any) {
-    Toast.show({
-      type: 'error',
-      text1: 'Failed to fetch requests',
-      text2: error?.response?.data?.message || 'Something went wrong',
-    });
-    throw error;
+    throw new Error(error);
   }
 };
 
-export const acceptRequest = async (userId: string): Promise<void> => {
+export const acceptRequest = async (requestId: string): Promise<void> => {
   try {
-    await api.post(`/request/accept/${userId}`);
+    const resp = await api.post(`/request/review/accepted/${requestId}`);
+
     Toast.show({ type: 'success', text1: 'Request accepted' });
   } catch (error: any) {
     Toast.show({
@@ -29,9 +25,9 @@ export const acceptRequest = async (userId: string): Promise<void> => {
   }
 };
 
-export const rejectRequest = async (userId: string): Promise<void> => {
+export const rejectRequest = async (requestId: string): Promise<void> => {
   try {
-    await api.post(`/request/reject/${userId}`);
+    await api.post(`/request/review/rejected/${requestId}`);
     Toast.show({ type: 'info', text1: 'Request rejected' });
   } catch (error: any) {
     Toast.show({
@@ -42,3 +38,5 @@ export const rejectRequest = async (userId: string): Promise<void> => {
     throw error;
   }
 };
+
+

@@ -21,6 +21,7 @@ import {
 import { useRequestStore } from '../store/requestStore';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Entypo from 'react-native-vector-icons/Entypo';
+import RequestDetailModal from '../components/RequestDetailModal';
 
 const { width } = Dimensions.get('window');
 
@@ -28,13 +29,13 @@ const ReceivedRequestsScreen = () => {
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const { requests, setRequests, removeRequest } = useRequestStore();
-  console.log('selectedUser', selectedUser);
-
-  console.log(requests, 'requests');
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
 
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  console.log('request:', requests);
 
   const fetchRequests = async () => {
     try {
@@ -42,6 +43,7 @@ const ReceivedRequestsScreen = () => {
       const res = await getReceivedRequests();
       setRequests(res);
     } catch {
+      setRequests([]);
       // Error already handled via Toast in service
     } finally {
       setLoading(false);
@@ -50,24 +52,20 @@ const ReceivedRequestsScreen = () => {
 
   const handleAccept = async (id: string) => {
     try {
-      await api.post(`/request/accept/${id}`);
-      Toast.show({ type: 'success', text1: 'Request accepted' });
+      console.log('selectedRequest._id:', selectedRequest._id);
+
+      await acceptRequest(selectedRequest._id);
       fetchRequests();
       setSelectedUser(null);
-    } catch {
-      Toast.show({ type: 'error', text1: 'Failed to accept request' });
-    }
+    } catch {}
   };
 
   const handleReject = async (id: string) => {
     try {
-      await api.post(`/request/reject/${id}`);
-      Toast.show({ type: 'info', text1: 'Request rejected' });
+      await rejectRequest(selectedRequest._id);
       fetchRequests();
       setSelectedUser(null);
-    } catch {
-      Toast.show({ type: 'error', text1: 'Failed to reject request' });
-    }
+    } catch {}
   };
 
   const renderItem = ({ item }: { item: any }) => {
@@ -76,7 +74,10 @@ const ReceivedRequestsScreen = () => {
     return (
       <TouchableOpacity
         style={styles.listItem}
-        onPress={() => setSelectedUser(user)}
+        onPress={() => {
+          setSelectedRequest(item);
+          setSelectedUser(user);
+        }}
       >
         {user?.photoUrl ? (
           <Image source={{ uri: user.photoUrl }} style={styles.avatarLarge} />
@@ -118,53 +119,13 @@ const ReceivedRequestsScreen = () => {
           />
         )}
 
-        <Modal visible={!!selectedUser} transparent animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.card}>
-              <Image
-                source={{
-                  uri:
-                    selectedUser?.photoUrl || 'https://via.placeholder.com/150',
-                }}
-                style={styles.cardImageLarge}
-              />
-              <Text style={styles.cardTitle}>
-                {selectedUser?.firstName} {selectedUser?.lastName}
-              </Text>
-              {selectedUser?.description ? (
-                <Text style={styles.cardDescription}>
-                  {selectedUser.description}
-                </Text>
-              ) : null}
-              <Text style={styles.cardDetail}>Age: {selectedUser?.age}</Text>
-              <Text style={styles.cardDetail}>
-                Gender: {selectedUser?.gender}
-              </Text>
-              <Text style={styles.cardDetail}>
-                Skills: {selectedUser?.skills?.join(', ') || 'None'}
-              </Text>
-
-              <View style={styles.cardActions}>
-                <TouchableOpacity
-                  onPress={() => handleAccept(selectedUser._id)}
-                  style={styles.acceptBtn}
-                >
-                  <Text style={styles.btnText}>Accept</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleReject(selectedUser._id)}
-                  style={styles.rejectBtn}
-                >
-                  <Text style={styles.btnText}>Reject</Text>
-                </TouchableOpacity>
-              </View>
-
-              <TouchableOpacity onPress={() => setSelectedUser(null)}>
-                <Text style={styles.closeText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+        <RequestDetailModal
+          visible={!!selectedUser}
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onAccept={handleAccept}
+          onReject={handleReject}
+        />
       </View>
     </AppScreen>
   );
@@ -192,11 +153,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-  },
   name: {
     fontSize: 16,
     fontWeight: '600',
@@ -205,65 +161,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#555',
   },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    width: width * 0.8,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
-  },
-  cardImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 12,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  cardDetail: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    marginTop: 12,
-    gap: 12,
-  },
-  acceptBtn: {
-    backgroundColor: '#4caf50',
-    padding: 10,
-    borderRadius: 8,
-  },
-  rejectBtn: {
-    backgroundColor: '#f44336',
-    padding: 10,
-    borderRadius: 8,
-  },
-  btnText: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  closeText: {
-    marginTop: 12,
-    color: '#555',
-    textDecorationLine: 'underline',
-  },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 40,
@@ -294,20 +192,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#444',
     marginTop: 2,
-  },
-  cardImageLarge: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    marginBottom: 10,
-    backgroundColor: '#eee',
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: '#555',
-    fontStyle: 'italic',
-    marginBottom: 8,
-    textAlign: 'center',
-    paddingHorizontal: 10,
   },
 });

@@ -13,7 +13,7 @@ const AppScreen = ({ children }: AppScreenProps) => {
       colors={['#FFDEE9', '#B5FFFC']} // 🎨 soft dating-app colors
       style={styles.gradient}
     >
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.container}>{children}</View>
       </SafeAreaView>
     </LinearGradient>
@@ -25,13 +25,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   safeArea: {
-    // flex: 1,
+    flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   container: {
-    // flex: 1,
+    flex: 1,
     // paddingHorizontal: 16,
-    paddingBottom: 10,
+    // paddingBottom: 10,
   },
 });
 
