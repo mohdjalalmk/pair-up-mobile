@@ -7,22 +7,33 @@ import CustomTabBarButton from '../components/CustomTabBarButton';
 import TabIcon from '../components/TabIcon';
 import ProfileScreen from '../screens/ProfileScreen';
 import ReceivedRequestsScreen from '../screens/ReceivedRequests';
+import ChatStack from './ChatStack';
+import {
+  getFocusedRouteNameFromRoute,
+  RouteProp,
+} from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
 const BottomTabs = () => {
+  const getTabBarStyle = (route: RouteProp<any>) => {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+    if (routeName === 'ChatScreen') {
+      return { display: 'none' };
+    }
+    return styles.tabBarStyle;
+  };
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: {
-          ...styles.tabBarStyle,
-        },
+        tabBarStyle: getTabBarStyle(route),
       })}
     >
       <Tab.Screen
-        name="Home"
+        name="home"
         component={HomeScreen}
         options={{
           tabBarIcon: ({ focused }) => (
@@ -31,8 +42,8 @@ const BottomTabs = () => {
         }}
       />
       <Tab.Screen
-        name="Screen 2"
-        component={HomeScreen}
+        name="connections"
+        component={ChatStack}
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon focused={focused} icon={'chat'} />
