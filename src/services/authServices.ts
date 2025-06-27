@@ -1,4 +1,3 @@
-// src/services/authService.ts
 import * as Keychain from 'react-native-keychain';
 import api from '../api/axiosInstance';
 import { useAuthStore } from '../store/authStore';
@@ -18,7 +17,6 @@ export const login = async (email: string, password: string) => {
 
     await storeToken(token);
 
-    // Save to Zustand
     useAuthStore.getState().setToken(token);
     useUserStore.getState().setUser(user);
 
@@ -59,6 +57,13 @@ export const signupUser = async (userData: {
 }) => {
   try {
     const response = await api.post(`/signup`, userData);
+    const token = response.data.token;
+    const user = response.data.user;
+
+    await storeToken(token);
+
+    useAuthStore.getState().setToken(token);
+    useUserStore.getState().setUser(user);
     return response.data;
   } catch (error: any) {
     console.error('Signup error:', error.response?.data || error.message);

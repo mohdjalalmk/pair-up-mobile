@@ -33,9 +33,8 @@ const SignupScreen = () => {
         age,
         gender,
       };
-      const result = await signupUser(payload);
+      await signupUser(payload);
       Alert.alert('Success', 'Account created successfully');
-      navigation.goBack();
     } catch (err: any) {
       console.log(JSON.stringify(err));
       setError(err.response?.data);
