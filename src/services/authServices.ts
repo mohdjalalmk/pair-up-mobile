@@ -48,3 +48,33 @@ export const logout = async () => {
     });
   }
 };
+
+export const signupUser = async (userData: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  age: string;
+  gender: string;
+}) => {
+  try {
+    const response = await api.post(`/signup`, userData);
+    return response.data;
+  } catch (error: any) {
+    console.error('Signup error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const deleteAccount = async () => {
+  try {
+    await api.delete('/user/delete');
+  } catch (error) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to delete',
+      text2: err?.message || 'Please try again later',
+      position: 'bottom',
+    });
+  }
+};

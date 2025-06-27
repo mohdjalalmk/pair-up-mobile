@@ -17,7 +17,7 @@ import { useAuthStore } from '../store/authStore';
 import Keychain from 'react-native-keychain';
 import { removeToken } from '../utils/auth';
 import api from '../api/axiosInstance';
-import { logout } from '../services/authServices';
+import { deleteAccount, logout } from '../services/authServices';
 import { User, useUserStore } from '../store/userStore';
 import { updateProfile, viewProfile } from '../services/userService';
 import Toast from 'react-native-toast-message';
@@ -65,11 +65,15 @@ const ProfileScreen = () => {
     useAuthStore.getState().logout();
   };
 
-  const handleDelete = () => {
-    Alert.alert('Delete Account', 'Are you sure?', [
-      { text: 'Cancel' },
-      { text: 'Delete', onPress: () => Alert.alert('Account deleted') },
-    ]);
+  const handleDelete = async () => {
+    await deleteAccount();
+
+    Toast.show({
+      type: 'info',
+      text1: 'Account deleted',
+    });
+    await removeToken();
+    useAuthStore.getState().logout();
   };
 
   const handleSave = async () => {

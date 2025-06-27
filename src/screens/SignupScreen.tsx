@@ -1,4 +1,3 @@
-// src/screens/SignupScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -6,18 +5,42 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { signupUser } from '../services/authServices';
 
 const SignupScreen = () => {
   const navigation = useNavigation<any>();
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignup = () => {
-    console.log('Signing up:', name, email, password);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSignup = async () => {
+    setError('');
+    try {
+      const payload = {
+        firstName,
+        lastName,
+        email,
+        password,
+        age,
+        gender,
+      };
+      const result = await signupUser(payload);
+      Alert.alert('Success', 'Account created successfully');
+      navigation.goBack();
+    } catch (err: any) {
+      console.log(JSON.stringify(err));
+      setError(err.response?.data);
+      Alert.alert('Error', err.response?.data || 'Signup failed');
+    }
   };
 
   const InputContainer = () => {
@@ -25,11 +48,29 @@ const SignupScreen = () => {
       <>
         <TextInput
           style={styles.input}
-          placeholder="Full Name"
-          onChangeText={setName}
-          value={name}
+          placeholder="First Name"
+          onChangeText={setFirstName}
+          value={firstName}
         />
-
+        <TextInput
+          style={styles.input}
+          placeholder="Last Name"
+          onChangeText={setLastName}
+          value={lastName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Age"
+          keyboardType="numeric"
+          onChangeText={setAge}
+          value={age}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Gender (male/female)"
+          onChangeText={setGender}
+          value={gender}
+        />
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -38,7 +79,6 @@ const SignupScreen = () => {
           onChangeText={setEmail}
           value={email}
         />
-
         <View style={styles.passwordContainer}>
           <TextInput
             style={styles.passwordInput}
@@ -51,6 +91,7 @@ const SignupScreen = () => {
             <Text style={styles.toggle}>{showPassword ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         </View>
+        {error && <Text style={styles.error}>{error}</Text>}
       </>
     );
   };
@@ -80,7 +121,6 @@ const SignupScreen = () => {
     </View>
   );
 };
-
 export default SignupScreen;
 
 const styles = StyleSheet.create({
@@ -122,4 +162,8 @@ const styles = StyleSheet.create({
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   bottomText: { marginTop: 20, textAlign: 'center', color: '#444' },
   link: { color: '#FF5A5F', fontWeight: 'bold' },
+  error: {
+    color: '#A52A2A',
+    marginVertical: 10,
+  },
 });
