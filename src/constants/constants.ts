@@ -7,5 +7,4 @@ export const ALLOWED_EDIT_FIELDS: (keyof User)[] = [
   'skills',
   'firstName',
   'lastName',
-  'photoUrl',
 ];

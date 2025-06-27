@@ -39,10 +39,14 @@ export const viewProfile = async (): Promise<any> => {
   }
 };
 
-export const updateProfile = async (updatedData: Partial<User>) => {
+export const updateProfile = async (formData: FormData) => {
   try {
-    const response = await api.patch('/profile/edit', updatedData);
-    return response.data;
+    const resp = await api.patch('/profile/edit', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return resp;
   } catch (error: any) {
     throw new Error(
       error?.response?.data?.message || 'Failed to update profile',

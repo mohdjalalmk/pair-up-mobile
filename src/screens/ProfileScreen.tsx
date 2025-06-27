@@ -22,6 +22,7 @@ import { User, useUserStore } from '../store/userStore';
 import { updateProfile, viewProfile } from '../services/userService';
 import Toast from 'react-native-toast-message';
 import { ALLOWED_EDIT_FIELDS } from '../constants/constants';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const ProfileScreen = () => {
   const storeUser = useUserStore(state => state.user);
@@ -31,6 +32,7 @@ const ProfileScreen = () => {
   const [editing, setEditing] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<any>(null); // holds file data
 
   useEffect(() => {
     if (!user) {
@@ -40,8 +42,6 @@ const ProfileScreen = () => {
 
   const fetchProfile = async () => {
     try {
-      console.log('Calling');
-
       setLoading(true);
       const profileData = await viewProfile();
       setUser(profileData);
@@ -76,24 +76,51 @@ const ProfileScreen = () => {
     useAuthStore.getState().logout();
   };
 
+  const handleImagePick = async () => {
+    if (!editing) return;
+    console.log('here');
+
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      selectionLimit: 1,
+    });
+
+    if (result.didCancel || result.errorCode) return;
+
+    const asset = result.assets?.[0];
+    if (asset?.uri) {
+      setSelectedImage({
+        uri: asset.uri,
+        type: asset.type || 'image/jpeg',
+        name: asset.fileName || 'profile.jpg',
+      });
+      setUser({ ...user, photoUrl: asset.uri });
+    }
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
-      const filteredUser: Partial<User> = ALLOWED_EDIT_FIELDS.reduce(
-        (acc, key) => {
-          if (user[key] !== undefined) {
-            (acc as any)[key] = user[key];
-          }
-          return acc;
-        },
-        {} as Partial<User>,
-      );
 
-      await updateProfile(filteredUser);
-      Toast.show({
-        type: 'success',
-        text1: 'Profile updated',
+      const formData = new FormData();
+
+      // Append editable user fields
+      ALLOWED_EDIT_FIELDS.forEach(key => {
+        const value = (user as any)[key];
+        if (value !== undefined) {
+          formData.append(key, value);
+        }
       });
+
+      // Append image file under '/image' if selected
+      if (selectedImage) {
+        formData.append('photo', selectedImage);
+      }
+      console.log('formdat:', JSON.stringify(formData));
+
+      await updateProfile(formData);
+
+      Toast.show({ type: 'success', text1: 'Profile updated' });
       setEditing(false);
     } catch (error) {
       if (error instanceof Error) {
@@ -217,22 +244,17 @@ const ProfileScreen = () => {
 
   const ProfilePhoto = () => {
     return (
-      <>
+      <TouchableOpacity disabled={!editing} onPress={handleImagePick}>
         {user?.photoUrl ? (
           <View style={styles.photo}>
-            <Image
-              source={{
-                uri: user.photoUrl,
-              }}
-              style={styles.profileIcon}
-            />
+            <Image source={{ uri: user.photoUrl }} style={styles.profileIcon} />
           </View>
         ) : (
           <View style={styles.center}>
             <Icon size={100} name={'user'} />
           </View>
         )}
-      </>
+      </TouchableOpacity>
     );
   };
 
@@ -249,19 +271,21 @@ const ProfileScreen = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+  const LoadingIndicator = () => {
+    if (loading) {
+      return (
+          <ActivityIndicator size="large" />
+      );
+    }
+  };
 
   return (
     <AppScreen>
       {/* Header */}
       {ProfileHeader()}
       {ProfilePhoto()}
+      {LoadingIndicator()}
+
       {/* 3-dot Menu */}
       {menuVisible && ProfileMenu()}
       {FormContent()}

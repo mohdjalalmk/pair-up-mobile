@@ -6,9 +6,6 @@ import { useAuthStore } from '../store/authStore';
 const api = axios.create({
   baseURL: 'http://localhost:3000/', // Change to your server IP if testing on device
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json', // ✅ added here
-  },
 });
 
 // Add token to headers before request
