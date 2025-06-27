@@ -163,7 +163,9 @@ const ProfileScreen = () => {
 
   const FormContent = () => {
     return (
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: 100 }]}
+      >
         {renderTextOrInput('First Name', user?.firstName, text =>
           setUser({ ...user, firstName: text }),
         )}
@@ -273,9 +275,7 @@ const ProfileScreen = () => {
 
   const LoadingIndicator = () => {
     if (loading) {
-      return (
-          <ActivityIndicator size="large" />
-      );
+      return <ActivityIndicator size="large" />;
     }
   };
 

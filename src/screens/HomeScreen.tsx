@@ -37,8 +37,7 @@ const HomeScreen = () => {
         setHasMore(false);
         return;
       }
-      console.log('fetched response:', data);
-
+ 
       setFeed(prev => (currentPage === 1 ? data : [...prev, ...data]));
     } catch (err: any) {
       console.error('Error fetching feed:', err);
