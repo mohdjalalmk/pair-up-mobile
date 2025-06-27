@@ -102,14 +102,18 @@ const HomeScreen = () => {
     <View style={[styles.card, styles.shadow]}>
       <View style={styles.imageContainer}>
         <Image
-          source={require(`../../assets/images/img1.jpeg`)} // replace with item.photoUrl if available
+          source={
+            item.photoUrl
+              ? { uri: item.photoUrl }
+              : require('../../assets/images/profile.png')
+          }
           style={styles.profileImage}
           resizeMode="cover"
         />
         <View style={styles.detailsOverlay}>
           <Text style={styles.nameText}>{item.firstName}</Text>
           <Text style={styles.subText}>
-            {item.age} | {' '}
+            {item.age} |{' '}
             {item.gender?.charAt(0).toUpperCase() + item.gender?.slice(1)}
           </Text>
         </View>
