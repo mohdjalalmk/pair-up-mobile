@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   BackHandler,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { login } from '../services/authServices';
@@ -14,6 +15,7 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState<Boolean>(false);
   const navigation = useNavigation<any>();
 
   useEffect(() => {
@@ -27,7 +29,13 @@ const LoginScreen = () => {
   }, []);
 
   const handleLogin = async () => {
-    await login(email, password);
+    try {
+      setLoading(true);
+      await login(email, password);
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
   };
 
   const InputContainer = () => {
@@ -62,6 +70,7 @@ const LoginScreen = () => {
       <>
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.buttonText}>Log In</Text>
+          {loading && <ActivityIndicator color="#ddd" style={styles.loading} />}
         </TouchableOpacity>
 
         <Text style={styles.bottomText}>
@@ -123,8 +132,13 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   bottomText: { marginTop: 20, textAlign: 'center', color: '#444' },
   link: { color: '#FF5A5F', fontWeight: 'bold' },
+  loading: {
+    marginLeft: 10,
+  },
 });
