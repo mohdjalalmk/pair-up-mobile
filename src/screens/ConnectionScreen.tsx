@@ -39,7 +39,6 @@ const ConnectionsScreen = () => {
       <TouchableOpacity
         style={styles.card}
         onPress={() =>
-          // navigation.nav
           navigation.navigate('ChatScreen', {
             userId: item._id,
             name: `${item.firstName} ${item.lastName}`,
