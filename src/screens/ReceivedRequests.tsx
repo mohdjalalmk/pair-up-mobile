@@ -34,9 +34,7 @@ const ReceivedRequestsScreen = () => {
   useEffect(() => {
     fetchRequests();
   }, []);
-
-  console.log('request:', requests);
-
+  
   const fetchRequests = async () => {
     try {
       setLoading(true);

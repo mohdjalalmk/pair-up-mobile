@@ -163,9 +163,7 @@ const ProfileScreen = () => {
 
   const FormContent = () => {
     return (
-      <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: 100 }]}
-      >
+      <ScrollView contentContainerStyle={styles.content}>
         {renderTextOrInput('First Name', user?.firstName, text =>
           setUser({ ...user, firstName: text }),
         )}
@@ -263,9 +261,7 @@ const ProfileScreen = () => {
   const ProfileHeader = () => {
     return (
       <View style={styles.header}>
-        <View style={styles.profile}>
-          <Text style={styles.title}>Profile</Text>
-        </View>
+        <View/>
         <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
           <Icon name="dots-three-vertical" size={24} />
         </TouchableOpacity>
@@ -275,7 +271,9 @@ const ProfileScreen = () => {
 
   const LoadingIndicator = () => {
     if (loading) {
-      return <ActivityIndicator size="large" />;
+      return (
+          <ActivityIndicator size="large" />
+      );
     }
   };
 
@@ -306,11 +304,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  profile: {
-    backgroundColor: '#798c86',
-    padding: 5,
-    borderRadius: 10,
   },
   menu: {
     backgroundColor: '#fff',

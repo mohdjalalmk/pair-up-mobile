@@ -1,13 +1,11 @@
-// services/userService.ts
 import api from '../api/axiosInstance';
-import axios, { AxiosError } from 'axios';
-import { User } from '../store/userStore';
+import  { AxiosError } from 'axios';
 import Toast from 'react-native-toast-message';
 
 export const getUserFeed = async (page = 1): Promise<any[]> => {
   try {
     const response = await api.get(`/user/feed?page=${page}&limit=4`);
-    return response.data.data; // Ensure your backend supports pagination
+    return response.data.data;
   } catch (err) {
     const error = err as AxiosError<{ message: string }>;
     throw new Error(error.response?.data?.message || 'Failed to fetch users');
@@ -28,7 +26,6 @@ export const sendSwipeResponse = async (
     );
   }
 };
-// services/userService.ts
 export const viewProfile = async (): Promise<any> => {
   try {
     const response = await api.get(`/profile/view`);

@@ -1,9 +1,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Image, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import HomeScreen from '../screens/HomeScreen';
-import CustomTabBarButton from '../components/CustomTabBarButton';
 import TabIcon from '../components/TabIcon';
 import ProfileScreen from '../screens/ProfileScreen';
 import ReceivedRequestsScreen from '../screens/ReceivedRequests';
@@ -50,19 +49,6 @@ const BottomTabs = () => {
           ),
         }}
       />
-      {/* <Tab.Screen
-        name="Screen 3"
-        component={HomeScreen}
-        options={{
-          tabBarIcon: () => (
-            <Image
-              source={require('../../assets/images/mgic.png')}
-              style={styles.icon}
-            />
-          ),
-          tabBarButton: props => <CustomTabBarButton {...props} />,
-        }}
-      /> */}
       <Tab.Screen
         name="Screen 3"
         component={ReceivedRequestsScreen}

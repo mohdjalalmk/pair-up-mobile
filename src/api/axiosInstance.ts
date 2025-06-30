@@ -1,24 +1,22 @@
-// src/api/axiosInstance.ts
 import axios from 'axios';
 import { getToken, removeToken } from '../utils/auth';
 import { useAuthStore } from '../store/authStore';
+import { API_BASE_URL } from '@env';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/', // Change to your server IP if testing on device
+  //for local
+  // baseURL: 'http://localhost:3000/',
+  baseURL: API_BASE_URL,
   timeout: 10000,
 });
 
 // Add token to headers before request
 api.interceptors.request.use(
   async config => {
-    console.log('here');
-
     const token = await getToken();
-    console.log('Token in Axios:', token); // ✅ ADD THIS
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('token:', token);
     }
     return config;
   },

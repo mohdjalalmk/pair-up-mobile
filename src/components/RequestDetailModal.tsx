@@ -45,7 +45,7 @@ const RequestDetailModal: React.FC<Props> = ({
         >
           <Image
             source={{
-              uri: user?.photoUrl || 'https://via.placeholder.com/150',
+              uri: user?.photoUrl
             }}
             style={styles.cardImageWide}
           />

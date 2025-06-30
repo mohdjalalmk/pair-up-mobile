@@ -1,4 +1,3 @@
-// src/utils/auth.ts
 import EncryptedStorage from 'react-native-encrypted-storage';
 
 const TOKEN_KEY = 'auth_token';
