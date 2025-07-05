@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 
 export interface User {
+  premiumExpiry: Date;
+  isPremium: Boolean;
   _id: string;
   firstName: string;
   lastName: string;

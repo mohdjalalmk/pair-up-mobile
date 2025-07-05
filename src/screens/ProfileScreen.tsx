@@ -5,7 +5,6 @@ import {
   TextInput,
   Button,
   StyleSheet,
-  Alert,
   ScrollView,
   TouchableOpacity,
   Image,
@@ -14,15 +13,15 @@ import {
 import Icon from 'react-native-vector-icons/Entypo';
 import AppScreen from '../components/AppScreen';
 import { useAuthStore } from '../store/authStore';
-import Keychain from 'react-native-keychain';
 import { removeToken } from '../utils/auth';
-import api from '../api/axiosInstance';
 import { deleteAccount, logout } from '../services/authServices';
 import { User, useUserStore } from '../store/userStore';
 import { updateProfile, viewProfile } from '../services/userService';
 import Toast from 'react-native-toast-message';
 import { ALLOWED_EDIT_FIELDS } from '../constants/constants';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { createOrder } from '../services/paymentServices';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const ProfileScreen = () => {
   const storeUser = useUserStore(state => state.user);
@@ -32,7 +31,7 @@ const ProfileScreen = () => {
   const [editing, setEditing] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<any>(null); // holds file data
+  const [selectedImage, setSelectedImage] = useState<any>(null);
 
   useEffect(() => {
     if (!user) {
@@ -134,6 +133,36 @@ const ProfileScreen = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePremiumPurchase = async () => {
+    const order = await createOrder();
+    const options = {
+      description: 'Premium Membership',
+      currency: order.cuurency,
+      key: order.keyId,
+      amount: order.amount,
+      name: 'Pair Up',
+      order_id: order.id,
+      prefill: {
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+      },
+      theme: { color: '#00a86b' },
+    };
+
+    RazorpayCheckout.open(options)
+      .then(paymentData => {
+        Toast.show({ type: 'success', text1: 'Payment Successful' });
+      })
+      .catch(error => {
+        console.log('Payment failed:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Payment Failed',
+          text2: error.description || 'Something went wrong',
+        });
+      });
   };
 
   const renderTextOrInput = (
@@ -261,7 +290,7 @@ const ProfileScreen = () => {
   const ProfileHeader = () => {
     return (
       <View style={styles.header}>
-        <View/>
+        <View />
         <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
           <Icon name="dots-three-vertical" size={24} />
         </TouchableOpacity>
@@ -269,11 +298,46 @@ const ProfileScreen = () => {
     );
   };
 
+  const PremiumInfo = () => {
+    if (user?.isPremium) {
+      const expiry = new Date(user.premiumExpiry).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+
+      return (
+        <View
+          style={[
+            styles.premiumCard,
+            { borderColor: '#ffd700', backgroundColor: '#fffbe6' },
+          ]}
+        >
+          <Text style={[styles.premiumTitle, { color: '#cc9900' }]}>
+            🌟 Premium User
+          </Text>
+          <Text style={styles.premiumDescription}>Valid until: {expiry}</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.premiumCard}>
+        <TouchableOpacity
+          onPress={handlePremiumPurchase}
+          style={styles.premiumButton}
+        >
+          <Text style={styles.premiumTitle}>🎉 Go Premium</Text>
+          <Text style={styles.premiumDescription}>
+            Unlock all features for ₹499
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   const LoadingIndicator = () => {
     if (loading) {
-      return (
-          <ActivityIndicator size="large" />
-      );
+      return <ActivityIndicator size="large" />;
     }
   };
 
@@ -282,6 +346,7 @@ const ProfileScreen = () => {
       {/* Header */}
       {ProfileHeader()}
       {ProfilePhoto()}
+      {PremiumInfo()}
       {LoadingIndicator()}
 
       {/* 3-dot Menu */}
@@ -373,4 +438,26 @@ const styles = StyleSheet.create({
     borderColor: '#798c86',
   },
   center: { justifyContent: 'center', alignItems: 'center' },
+  premiumCard: {
+    backgroundColor: '#e9f5f0',
+    padding: 16,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    marginVertical: 10,
+    borderColor: '#00a86b',
+    borderWidth: 1,
+  },
+  premiumButton: {
+    alignItems: 'center',
+  },
+  premiumTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#007f5f',
+  },
+  premiumDescription: {
+    fontSize: 14,
+    color: '#444',
+    marginTop: 4,
+  },
 });
