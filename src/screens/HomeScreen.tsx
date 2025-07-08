@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
-  Button,
   ActivityIndicator,
   Text,
   StyleSheet,
@@ -9,8 +8,6 @@ import {
   Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '../store/authStore';
-import Keychain from 'react-native-keychain';
 import { SwipeCard } from '../components/SwipeCard';
 import AppScreen from '../components/AppScreen';
 import { getUserFeed, sendSwipeResponse } from '../services/userService';
@@ -70,9 +67,7 @@ const HomeScreen = () => {
   const handleSwipeLeft = async (item: any) => {
     try {
       await sendSwipeResponse('ignored', item._id);
-      console.log('Swiped Left:', item);
     } catch (err) {
-      console.error('Error on left swipe:', err);
       Toast.show({
         type: 'error',
         text1: 'Swipe Failed',
@@ -85,9 +80,7 @@ const HomeScreen = () => {
   const handleSwipeRight = async (item: any) => {
     try {
       await sendSwipeResponse('interested', item._id);
-      console.log('Swiped Right:', item);
     } catch (err) {
-      console.error('Error on right swipe:', err);
       Toast.show({
         type: 'error',
         text1: 'Swipe Failed',
@@ -146,7 +139,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
-    // paddingHorizontal: 20,
   },
   card: {
     width: width * 0.9,

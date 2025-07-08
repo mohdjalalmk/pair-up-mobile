@@ -5,8 +5,8 @@ import { API_BASE_URL } from '@env';
 
 const api = axios.create({
   //for local
-  // baseURL: 'http://localhost:3000/',
-  baseURL: API_BASE_URL,
+  baseURL: 'http://localhost:3000/',
+  // baseURL: API_BASE_URL,
   timeout: 10000,
 });
 
@@ -28,8 +28,8 @@ api.interceptors.response.use(
   response => response,
   async error => {
     if (error.response?.status === 401) {
-      await removeToken(); // clear Keychain / storage
-      useAuthStore.getState().logout(); // clear Zustand and re-render UI
+      await removeToken(); 
+      useAuthStore.getState().logout();
     }
     return Promise.reject(error);
   },

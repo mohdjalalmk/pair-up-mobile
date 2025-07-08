@@ -25,8 +25,6 @@ import RazorpayCheckout from 'react-native-razorpay';
 
 const ProfileScreen = () => {
   const storeUser = useUserStore(state => state.user);
-  console.log(storeUser, ':::store user');
-
   const [user, setUser] = useState<User>(storeUser);
   const [editing, setEditing] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
@@ -43,6 +41,8 @@ const ProfileScreen = () => {
     try {
       setLoading(true);
       const profileData = await viewProfile();
+      useUserStore.getState().setUser(profileData);
+
       setUser(profileData);
     } catch (error) {
       if (error instanceof Error) {

@@ -127,14 +127,12 @@ export const SwipeCard = <T extends object>({
         break;
     }
 
-    // ✅ Trigger onEndReached if 2 items remaining
     if (currentIndex === data.length - 2 && onEndReached) {
       onEndReached();
     }
 
     position.setValue({ x: 0, y: 0 });
 
-    // ✅ Move to next card
     const nextIndex = currentIndex + 1;
     setIndex(nextIndex);
     currentIndexRef.current = nextIndex;
@@ -240,7 +238,7 @@ const styles = StyleSheet.create({
   likeLabel: {
     position: 'absolute',
     top: 40,
-    left: 20, // <<< Fixed: stick to left for right swipe
+    left: 20, 
     backgroundColor: 'rgba(0,255,0,0.15)',
     borderWidth: 2,
     borderColor: 'green',
@@ -259,7 +257,7 @@ const styles = StyleSheet.create({
   nopeLabel: {
     position: 'absolute',
     top: 40,
-    right: 20, // <<< Fixed: stick to right for left swipe
+    right: 20,
     backgroundColor: 'rgba(255,0,0,0.15)',
     borderWidth: 2,
     borderColor: 'red',
