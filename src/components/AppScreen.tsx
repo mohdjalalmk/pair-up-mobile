@@ -10,7 +10,7 @@ interface AppScreenProps {
 const AppScreen = ({ children }: AppScreenProps) => {
   return (
     <LinearGradient
-      colors={['#FFDEE9', '#B5FFFC']} // 🎨 soft dating-app colors
+      colors={['#FFDEE9', '#B5FFFC']}
       style={styles.gradient}
     >
       <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -30,8 +30,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    // paddingHorizontal: 16,
-    // paddingBottom: 10,
   },
 });
 

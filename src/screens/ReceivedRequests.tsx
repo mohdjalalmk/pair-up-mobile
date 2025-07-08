@@ -7,12 +7,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   Image,
-  Modal,
   Dimensions,
 } from 'react-native';
 import AppScreen from '../components/AppScreen';
-import api from '../api/axiosInstance';
-import Toast from 'react-native-toast-message';
 import {
   getReceivedRequests,
   acceptRequest,

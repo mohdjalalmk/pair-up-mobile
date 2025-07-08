@@ -13,6 +13,7 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import AppScreen from '../components/AppScreen';
 import { createSocketConnection } from '../services/socket';
 import { useUserStore } from '../store/userStore';
+import { getChatWithUser } from '../services/chatService';
 
 const ChatScreen = () => {
   const route = useRoute<any>();
@@ -52,7 +53,7 @@ const ChatScreen = () => {
 
     socket.on('connect_error', err => {
       //handle error
-      console.error('❌ Socket connection error:', err.message);
+      // console.error('Socket connection error:', err.message);
     });
 
     return () => {
@@ -60,11 +61,27 @@ const ChatScreen = () => {
     };
   }, [userId, user?._id]);
 
+  useEffect(() => {
+    const fetchChat = async () => {
+      try {
+        const chat = await getChatWithUser(userId);
+        if (chat?.messages) {
+          setMessages(chat.messages);
+        } else {
+          setMessages([]);
+        }
+      } catch (err) {
+        // console.log('Failed to load chat:', err);
+      }
+    };
+
+    if (userId) fetchChat();
+  }, [userId]);
+
   const handleSend = () => {
     if (!input.trim()) return;
-
     const messageObj = {
-      fromUserId: user._id,
+      fromUserId: user?._id,
       toUserId: userId,
       message: input,
     };
@@ -75,7 +92,7 @@ const ChatScreen = () => {
   };
 
   const renderMessage = ({ item }: { item: any }) => {
-    const isMe = item.fromUserId === user._id;
+    const isMe = item.fromUserId === user?._id;
 
     return (
       <View
@@ -106,11 +123,10 @@ const ChatScreen = () => {
 
         {/* Messages */}
         <FlatList
-          data={[...messages].reverse()}
-          keyExtractor={item => item.id}
+          data={messages}
+          keyExtractor={item => item._id}
           renderItem={renderMessage}
           contentContainerStyle={styles.chatBox}
-          inverted
         />
 
         {/* Input */}

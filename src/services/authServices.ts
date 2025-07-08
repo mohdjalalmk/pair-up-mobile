@@ -22,8 +22,6 @@ export const login = async (email: string, password: string) => {
 
     return { user: response.data.token };
   } catch (error: any) {
-    console.log('error', JSON.stringify(error));
-
     Toast.show({
       type: 'error',
       text1: 'Failed to login',
@@ -66,7 +64,6 @@ export const signupUser = async (userData: {
     useUserStore.getState().setUser(user);
     return response.data;
   } catch (error: any) {
-    console.error('Signup error:', error.response?.data || error.message);
     throw error;
   }
 };
